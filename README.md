@@ -40,12 +40,20 @@ git clone https://github.com/ArtBIT/bash-intents.git
 # Alias it to, say, computer
 echo alias computer="/path/to/bash-intents/bash-intents" >> "$HOME/.bashrc"
 
-$> computer start the demo
+$> computer start the demo 
+# It stores a state value in `state.vars`
+# Check the [./intents/activate](./intents/activate)
+
 $> computer what is the status of the demo?
+# It reads a state value in `state.vars`
 The demo is running.
+
 $> computer stop the demo
+# It updates a state value in `state.vars`
+
 $> computer what is the status of the demo?
 The demo is not running.
+# It reads a state value in `state.vars`
 
 # starting/stopping/statuses for services in /etc/init.d/* are built in
 $> computer what is the status of bluetooth?
