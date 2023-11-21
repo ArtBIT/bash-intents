@@ -1,0 +1,30 @@
+# ft=bash
+
+# This intent file contains a list of REGEX rules to capture the "activation" intents.
+# Intents like "turn on", "start", "enable", etc. are captured here.
+# These regex rules also capture the action and the subject
+# For example, "turn on the lights" will be captured as:
+#  - action: turn on
+#  - subject: lights
+#  - intent: activate
+
+intent_regex=(
+    "(update|set|change|increase|decrease) ?(the|a|an)? <subject> to <value>"
+    "(update|set|change|increase|decrease) ?(the|a|an)? <subject>"
+)
+
+intent_handler() {
+    local sentence="$1"
+    eval "$2" # expands the named capture groups to bash variables
+
+    # Handle custom intents
+    case "$subject" in
+        demo)
+            set_state "demo" "$value"
+            ;;
+        *)
+            logger info "unknown subject: $subject"
+            ;;
+    esac
+
+}

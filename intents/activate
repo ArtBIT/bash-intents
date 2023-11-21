@@ -1,0 +1,57 @@
+# ft=bash
+
+# This intent file contains a list of REGEX rules to capture the "activation" intents.
+# Intents like "turn on", "start", "enable", etc. are captured here.
+# These regex rules also capture the action and the subject
+# For example, "turn on the lights" will be captured as:
+#  - action: turn on
+#  - subject: lights
+#  - intent: activate
+
+action="(turn on|start|enable|open|launch|run|activate|boot|boot up|power up|power on|switch on|switch)"
+intent_regex=(
+    "${action} ?(the|a|an)? <subject> (at|in|on) ?(the|a|an)? <object>"
+    "${action} ?(the|a|an)? <subject>"
+    "(it's |it is |its )?<subject> time"
+)
+
+intent_handler() {
+    local sentence="$1"
+    eval "$2" # expands the named capture groups to bash variables
+
+    # list all startable services on linux
+    # systemctl list-unit-files --type=service | grep enabled | awk '{print $1}' | sed 's/\.service//g'
+
+    # Check if the subject is a service
+    if [ -f "/etc/init.d/$subject" ]; then
+        logger info "starting service $subject"
+        sudo service "$subject" start
+        return
+    fi
+
+    # Check if the subject is a program
+    if [ -f "/usr/bin/$subject" ]; then
+        # check if the program is already running
+        if pgrep -x "$subject" > /dev/null; then
+            logger info "program $subject is already running"
+            return
+        fi
+        logger info "starting program $subject"
+        nohup "$subject" &
+        return
+    fi
+
+    # Handle custom intents
+    case "$subject" in
+        "rocket")
+            xdg-open https://www.youtube.com/shorts/K6rUDI0MVXI
+            ;;
+        demo)
+            set_state "demo" "true"
+            ;;
+        *)
+            logger info "unknown subject: $subject"
+            ;;
+    esac
+
+}

@@ -1,0 +1,63 @@
+# ft=bash
+
+# This intent file contains a list of REGEX rules to capture the "activation" intents.
+# Intents like "turn on", "start", "enable", etc. are captured here.
+# These regex rules also capture the action and the subject
+# For example, "turn on the lights" will be captured as:
+#  - action: turn on
+#  - subject: lights
+#  - intent: activate
+
+intent_regex=(
+    "check ?(the|a|an)? <subject>"
+    "where is ?(the|a|an)? <subject>"
+    "what is the status of ?(the|a|an)? <subject>"
+    "what is ?(my|the|a|an)? <subject> status"
+    "what is the state of ?(the|a|an)? <subject>"
+    "is ?(the|a|an)? <subject> (on|off|running|active|enabled)"
+)
+
+intent_handler() {
+    local sentence="$1"
+    eval "$2" # expands the named capture groups to bash variables
+   
+    # Check if the subject is a service
+    if [ -f "/etc/init.d/$subject" ]; then
+        # Check the status of the service
+        service_status=$(service $subject status)
+        if [[ $service_status == *"running"* ]]; then
+            espeak "The $subject is running"
+        else
+            espeak "The $subject is not running"
+        fi
+        return
+    fi
+
+    # Check if the subject is a program
+    if [ -f "/usr/bin/$subject" ]; then
+        # Check the status of the program
+        program_status=$(pgrep $subject)
+        if [ -z "$program_status" ]; then
+            espeak "The $subject is not running"
+        else
+            espeak "The $subject is running"
+        fi
+        return
+    fi
+
+    # Handle custom intents
+    case "$subject" in
+        demo)
+            value=$(get_state "demo")
+            if [ "$value" == "true" ]; then
+                espeak "The demo is running"
+            else
+                espeak "The demo is not running"
+            fi
+            ;;
+        *)
+            logger info "unknown subject: $subject"
+            ;;
+    esac
+
+}

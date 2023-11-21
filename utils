@@ -1,0 +1,196 @@
+#!/bin/bash
+
+# This script contains common functions used by other scripts
+# It should be sourced by other scripts, not executed directly
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+STATE_FILE="$SCRIPT_DIR/state.vars"
+
+# Log a message to the console depending on the debug level specified by
+# the DEBUG environment variable
+function logger() {
+    local CHANNEL="$1"
+    local IGNORE=1
+    local TIMESTAMP=$(date +%FT%T%z)
+    shift
+    if [ ! -z "$CHANNEL" ]; then
+        if [ "$CHANNEL" == "error" ]; then
+            IGNORE=0
+        elif [ ! -z "$DEBUG" ]; then
+            RULES="\(${DEBUG//,/\\|}\)"
+            if echo "$CHANNEL" | grep -q "$RULES"; then
+                IGNORE=0
+            fi
+        fi
+    fi
+    if [ "$DEBUG" == '*' ]; then
+        IGNORE=0
+    fi
+    if [ $IGNORE -eq 0 ]; then
+        echo -e "${CHANNEL}: ($TIMESTAMP) $@" >&2
+    fi
+}
+
+
+function play_sound() {
+    local dir="/usr/share/sounds/"
+    local sound="$1"
+    if [ -f "$dir/$sound.wav" ]; then
+        aplay "$dir/$sound.wav" &>/dev/null
+    fi
+}
+
+function beep() {
+    play_sound "beep"
+}
+
+# Read the state of a variable from the state file
+function get_state() {
+    state=$(cat $STATE_FILE | grep "^$1=" | cut -d'=' -f 2)
+    logger debug "Getting state $1 $state (default:$2)"
+    if [ -z "$state" ]; then
+        state="$2"
+    fi
+    # ignore trailing newline
+    state=$(echo "$state" | tr -d '\n')
+    echo "$state"
+}
+
+# Write the state of a variable to the state file
+function set_state() {
+    logger debug "Setting state $1=$2"
+    # if state doesn't exist, add it
+    if ! grep -q "^$1=" $STATE_FILE; then
+        echo "$1=$2" >> $STATE_FILE
+    else 
+        # otherwise, replace the existing value
+        sed -i "s/^$1=.*$/$1=$2/" $STATE_FILE
+    fi
+}
+
+function get_named_capture_groups() {
+    # find all the named capture groups
+    echo "$1" | grep -o '<\([^>]\+\)>' | sed -n -e 's/<\([^>]\+\)>/\1/p'
+}
+
+# Take the custom regex and expand it to an actual, bash regex
+# For example: "[the|a|an] <subject>" -> "(the|a|an)? (.+)"
+function expand_custom_regex() {
+    local regex_with_optional="$1"
+
+    # Replace [the|a|an] with (the|a|an)?
+    local expanded_regex="${regex_with_optional//\[([^]]+)\]/(\1)?}"
+
+    # find all the named capture groups
+    local named_capture_groups=$(get_named_capture_groups "$expanded_regex")
+    logger debug "Named capture groups: $named_capture_groups"
+
+    # Replace <named_capture_group> with (.+)
+    for capture_group in $named_capture_groups; do
+        expanded_regex="${expanded_regex//<$capture_group>/(.+)}"
+    done
+    logger debug "Expanded regex: $expanded_regex"
+
+    echo "$expanded_regex"
+}
+
+# Find the indexes of named capture groups in the custom regex for use with BASH_REMATCH
+function find_capture_group_indexes() {
+    local custom_regex="$1"
+    local named_capture_groups="$2"
+
+    # Use sed to print each capture group regex on a separate line
+    local capture_groups=$(sed -n -e 's/\(([^(]\+)?\?\|<[^>]\+>\)/\1\n/gp'<<< "$custom_regex")
+
+    # Use grep to find the capture group index for the specified subject
+    local result=""
+    for capture_group in $named_capture_groups; do
+        local index=$(grep -n "<$capture_group>" <<< "$capture_groups" | cut -d':' -f 1)
+        result="$result $index"
+    done
+    # strip leading space
+    result="${result:1}"
+    echo "$result"
+}
+
+# color helpers
+
+function red() {
+    # wrap the input string in terminal color codes for red
+    echo -e "\e[31m$1\e[0m"
+}
+
+function green() {
+    # wrap the input string in terminal color codes for green
+    echo -e "\e[32m$1\e[0m"
+}
+
+function yellow() {
+    # wrap the input string in terminal color codes for yellow
+    echo -e "\e[33m$1\e[0m"
+}
+
+function blue() {
+    # wrap the input string in terminal color codes for blue
+    echo -e "\e[34m$1\e[0m"
+}
+
+function magenta() {
+    # wrap the input string in terminal color codes for magenta
+    echo -e "\e[35m$1\e[0m"
+}
+
+function cyan() {
+    # wrap the input string in terminal color codes for cyan
+    echo -e "\e[36m$1\e[0m"
+}
+
+# Match the text with the custom regex
+function match_text_with_regex() {
+    local text="$1"
+    local custom_regex="$2"
+
+    # Expand optional text and named capture groups in the custom regex
+    local expanded_regex=$(expand_custom_regex "$custom_regex")
+
+    # Add the 'i' flag to make the regex case-insensitive
+    local bash_regex="^${expanded_regex}$"
+
+    # Attempt to match the text with the regex
+
+    logger debug "Matching $(cyan "$text") against $(yellow "$bash_regex")"
+    if [[ "$text" =~ $bash_regex ]]; then
+        # dynamically build a hashmap of named capture groups
+        declare -A capture_groups
+        local named_capture_groups=$(get_named_capture_groups "$custom_regex")
+        local named_capture_groups_indexes=$(find_capture_group_indexes "$custom_regex" "$named_capture_groups")
+        logger debug "Named capture groups: $named_capture_groups"
+        logger debug "Named capture groups indexes: $named_capture_groups_indexes"
+
+        local matches=""
+        local capture_group_index=0
+        for capture_group in $named_capture_groups; do
+            local remach_index=${named_capture_groups_indexes[$capture_group_index]}
+            logger debug "Capture group: $capture_group index: $remach_index"
+            matches="$matches;$capture_group=\"${BASH_REMATCH[$remach_index]}\""
+            capture_group_index=$((capture_group_index+1))
+        done
+        # remove leading semicolon
+        matches="${matches:1}"
+        logger debug "Capture groups: $matches"
+
+        # Compile a string of the matched capture groups for debugging
+        local result=""
+        for capture_group in $named_capture_groups; do
+            result="$result$(green "$capture_group")=$(cyan "${capture_groups[$capture_group]}")\n"
+        done
+        logger debug $(green "Match: $(echo -e "$result" | sed '/^$/d' | tr '\n' ',' | sed -e 's/,$//g' -e 's/,/, /g')")
+
+        # return capture_groups as a json string
+        echo "$matches"
+
+        return 0
+    fi
+    logger debug $(red "No match")
+    return 1
+}

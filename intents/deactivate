@@ -1,0 +1,49 @@
+# ft=bash
+
+# This intent file contains a list of REGEX rules to capture the "activation" intents.
+# Intents like "turn on", "start", "enable", etc. are captured here.
+# These regex rules also capture the action and the subject
+# For example, "turn on the lights" will be captured as:
+#  - action: turn on
+#  - subject: lights
+#  - intent: activate
+
+action="(turn off|stop|disable|close|kill|terminate|shut down|power off|switch off)"
+intent_regex=(
+    "${action} ?(the|a|an)? <subject> (at|in|on) ?(the|a|an)? <object>"
+    "${action} ?(the|a|an)? <subject>"
+)
+
+intent_handler() {
+    local sentence="$1"
+    eval "$2" # expands the named capture groups to bash variables
+
+    # Check if the subject is a service
+    if [ -f "/etc/init.d/$subject" ]; then
+        logger info "starting service $subject"
+        sudo stop "$subject" start
+        return
+    fi
+
+    # Check if the subject is a program
+    if [ -f "/usr/bin/$subject" ]; then
+        # check if the program is already running
+        if pgrep -x "$subject" > /dev/null; then
+            # Kill the program
+            logger info "killing program $subject"
+            pkill -x "$subject"
+            return
+        fi
+        logger info "Program $subject not running"
+        return
+    fi
+
+    # Handle custom intents
+    case "$subject" in
+        demo)
+            set_state "demo" "false"
+            ;;
+        *) logger info "No handler for intent activate $subject"
+    esac
+
+}
