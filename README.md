@@ -18,7 +18,7 @@ computer stop the demo
 computer what is the status of the demo?
 ```
 
-[![asciicast](https://asciinema.org/a/5enWxNjy4Ggi6Z6Ol4ht7tDkh.svg)](https://asciinema.org/a/5enWxNjy4Ggi6Z6Ol4ht7tDkh)
+[![asciicast](https://asciinema.org/a/LbNOgxhO1fuNRgI1eOM3nyZrd.svg)](https://asciinema.org/a/LbNOgxhO1fuNRgI1eOM3nyZrd)
 
 # License
 
