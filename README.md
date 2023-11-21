@@ -1,5 +1,3 @@
-Synthesizing 0/10 solutions (Duplicates hidden)
-
 # Bash-Intents
 [![GitHub license](https://img.shields.io/github/license/ArtBIT/bash-intents.svg)](https://github.com/ArtBIT/bash-intents) [![GitHub stars](https://img.shields.io/github/stars/ArtBIT/bash-intents.svg)](https://github.com/ArtBIT/bash-intents)  [![awesomeness](https://img.shields.io/badge/awesomeness-maximum-red.svg)](https://github.com/ArtBIT/bash-intents)
 
