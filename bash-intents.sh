@@ -49,8 +49,8 @@ bash_intents() {
                 continue
             fi
 
-            logger info "Running $intent.intent_handler with"
-            logger info "$matched_array_as_a_string"
+            logger debug "Running $intent.intent_handler with"
+            logger debug "$matched_array_as_a_string"
             intent_handler "$text" "$eval_string"
             exit 0
         done

@@ -163,7 +163,7 @@ function match_text_with_regex() {
         # dynamically build a hashmap of named capture groups
         declare -A capture_groups
         local named_capture_groups=$(get_named_capture_groups "$custom_regex")
-        local named_capture_groups_indexes=$(find_capture_group_indexes "$custom_regex" "$named_capture_groups")
+        local named_capture_groups_indexes=($(find_capture_group_indexes "$custom_regex" "$named_capture_groups"))
         logger debug "Named capture groups: $named_capture_groups"
         logger debug "Named capture groups indexes: $named_capture_groups_indexes"
 
@@ -178,13 +178,6 @@ function match_text_with_regex() {
         # remove leading semicolon
         matches="${matches:1}"
         logger debug "Capture groups: $matches"
-
-        # Compile a string of the matched capture groups for debugging
-        local result=""
-        for capture_group in $named_capture_groups; do
-            result="$result$(green "$capture_group")=$(cyan "${capture_groups[$capture_group]}")\n"
-        done
-        logger debug $(green "Match: $(echo -e "$result" | sed '/^$/d' | tr '\n' ',' | sed -e 's/,$//g' -e 's/,/, /g')")
 
         # return capture_groups as a json string
         echo "$matches"
