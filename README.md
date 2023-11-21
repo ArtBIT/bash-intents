@@ -42,7 +42,7 @@ echo alias computer="/path/to/bash-intents/bash-intents" >> "$HOME/.bashrc"
 
 $> computer start the demo 
 # It stores a state value in `state.vars`
-# Check the [./intents/activate](./intents/activate)
+# Check the ./intents/activate intent_handler to see what the demo does
 
 $> computer what is the status of the demo?
 # It reads a state value in `state.vars`
