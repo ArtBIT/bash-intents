@@ -26,9 +26,9 @@ intent_handler() {
         # Check the status of the service
         service_status=$(service $subject status)
         if [[ $service_status == *"running"* ]]; then
-            espeak "The $subject is running"
+            echo "The $subject is running"
         else
-            espeak "The $subject is not running"
+            echo "The $subject is not running"
         fi
         return
     fi
@@ -38,9 +38,9 @@ intent_handler() {
         # Check the status of the program
         program_status=$(pgrep $subject)
         if [ -z "$program_status" ]; then
-            espeak "The $subject is not running"
+            echo "The $subject is not running"
         else
-            espeak "The $subject is running"
+            echo "The $subject is running"
         fi
         return
     fi
@@ -50,9 +50,9 @@ intent_handler() {
         demo)
             value=$(get_state "demo")
             if [ "$value" == "true" ]; then
-                espeak "The demo is running"
+                echo "The demo is running"
             else
-                espeak "The demo is not running"
+                echo "The demo is not running"
             fi
             ;;
         *)
