@@ -7,28 +7,35 @@ Ultra simple natural language processing in bash
 
 The general purpose of Bash Intents is to simplify natural language interaction in the command line. It uses regular expressions to match input text to an intent file. The intent files are located in the `./intents` subdirectory, and they simply define the `intent_regex` array of regex rules and an `intent_handler` function to run if the intent is matched.
 
-A minimal intent file would look like this:
+I have a smart microphone [ATOM Echo Smart Speaker](https://shop.m5stack.com/products/atom-echo-smart-speaker-dev-kit) and I needed a way to map spoken word into script actions, so I've built this.
+
+It's a glorified regex mapper. For each intent (which is a file in the `./intents` subdirectory(, you define a list of regex rules, and a handler. A minimal intent file would look like this:
 
 ```
 # ./intents/hello-world
 
 intent_regex=(
-    "Hello <name>" # <name> will be captured as $name in the intent_handler
+    "My name is <name>" 
 )
 
 intent_handler() {
     local sentence="$1"
     eval "$2" # expands the named capture groups to bash variables
+              # <name> from the intent_regex will be available as $name here
+
+    # we can save the value in the `./state.vars` file
+    set_state "name" "$name" 
 
     case "$name" in
         world)
-            echo "Hello world, indeed"
+            echo "Oh, well, hello World!"
             ;;
         *)
-            echo "It should be 'Hello world'"
+            echo "Hello, $name"
     esac
 }
 ```
+Check the [./intents](./intents) subdirectory, to see more examples.
 
 # Installation
 ```
