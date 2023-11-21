@@ -35,16 +35,33 @@ intent_handler() {
 # Installation
 ```
 git clone https://github.com/ArtBIT/bash-intents.git
-# Alias it to, say, computer
-echo alias computer="$PWD/bash-intents/bash-intents" >> "$HOME/.bashrc"
 ```
 
 # Usage
 ```
-computer start the demo
-computer what is the status of the demo?
-computer stop the demo
-computer what is the status of the demo?
+# Alias it to, say, computer
+echo alias computer="/path/to/bash-intents/bash-intents" >> "$HOME/.bashrc"
+
+$> computer start the demo
+$> computer what is the status of the demo?
+The demo is running.
+$> computer stop the demo
+$> computer what is the status of the demo?
+The demo is not running.
+
+# starting/stopping/statuses for services in /etc/init.d/* are built in
+$> computer what is the status of bluetooth?
+The bluetooth is running
+
+$> computer what is the status of cron?
+The cron is running
+```
+
+You can add more intents by creating a new intent file in the `intents` subdirectory.
+
+You can specify your own `intents` directory using the `$BASH_INTENTS_DIR` environment variable. 
+```
+export BASH_INTENTS_DIR=$HOME/intents
 ```
 
 [![asciicast](https://asciinema.org/a/LbNOgxhO1fuNRgI1eOM3nyZrd.svg)](https://asciinema.org/a/LbNOgxhO1fuNRgI1eOM3nyZrd)
