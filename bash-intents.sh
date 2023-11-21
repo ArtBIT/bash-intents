@@ -16,6 +16,8 @@ bash_intents() {
     # enable case insensitive matching
     shopt -s nocasematch 
 
+    # remove any interpunction from the text
+    text=$(echo "$text" | sed -e 's/[[:punct:]]//g')
 
     # Processes each intent_file in the ./intents directory
     # Each intent_file will contain an array of regex rules
