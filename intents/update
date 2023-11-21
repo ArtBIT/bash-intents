@@ -1,12 +1,13 @@
 # ft=bash
 
-# This intent file contains a list of REGEX rules to capture the "activation" intents.
-# Intents like "turn on", "start", "enable", etc. are captured here.
-# These regex rules also capture the action and the subject
-# For example, "turn on the lights" will be captured as:
-#  - action: turn on
-#  - subject: lights
-#  - intent: activate
+# This intent file contains a list of REGEX rules to capture the "update" intents.
+# Intents like "set", "increase", "decrease", etc. are captured here.
+# You can utilize set_state() to set the state of a device.
+#
+# Example trigger phrases:
+#  "set the light to 50%"
+#  "increase the volume"
+#  "decrease the temperature"
 
 intent_regex=(
     "(update|set|change|increase|decrease) ?(the|a|an)? <subject> to <value>"

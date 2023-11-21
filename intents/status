@@ -1,12 +1,12 @@
 # ft=bash
 
-# This intent file contains a list of REGEX rules to capture the "activation" intents.
-# Intents like "turn on", "start", "enable", etc. are captured here.
-# These regex rules also capture the action and the subject
-# For example, "turn on the lights" will be captured as:
-#  - action: turn on
-#  - subject: lights
-#  - intent: activate
+# This intent file contains a list of REGEX rules to capture the "status" intents.
+# Intents like "check", "where is", "what is the status", etc. are captured here.
+# 
+# Example triggers:
+#  - "check the lights"
+#  - "where is the car"
+#  - "what is the status of the garage"
 
 intent_regex=(
     "check ?(the|a|an)? <subject>"
