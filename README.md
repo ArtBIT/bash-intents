@@ -28,31 +28,39 @@ intent_handler() {
 
     case "$name" in
         world)
-            echo "Oh, well, hello World!"
+            echo "Hello World!"
             ;;
         *)
             echo "Hello, $name"
     esac
 }
 ```
+
+Then, you would just say:
+```
+./bash-intents.sh My name is world.
+# and you would get the following response
+Hello World!
+```
+
 Check the [./intents](./intents) subdirectory, to see more examples.
 
 # Installation
 ```
-git clone https://github.com/ArtBIT/bash-intents.git
+$> git clone https://github.com/ArtBIT/bash-intents.git
+
+# Alias it to, say, computer, alexa, jarvis, etc.
+$> echo alias computer="$PWD/bash-intents/bash-intents.sh" >> "$HOME/.bashrc"
 ```
 
 # Usage
 ```
-# Alias it to, say, computer
-echo alias computer="/path/to/bash-intents/bash-intents" >> "$HOME/.bashrc"
-
 $> computer start the demo 
 # It stores a state value in `state.vars`
 # Check the ./intents/activate intent_handler to see what the demo does
 
 $> computer what is the status of the demo?
-# It reads a state value in `state.vars`
+# It reads a state value from `state.vars`
 The demo is running.
 
 $> computer stop the demo
@@ -60,7 +68,7 @@ $> computer stop the demo
 
 $> computer what is the status of the demo?
 The demo is not running.
-# It reads a state value in `state.vars`
+# It reads a state value from `state.vars`
 
 # starting/stopping/statuses for services in /etc/init.d/* are built in
 $> computer what is the status of bluetooth?
